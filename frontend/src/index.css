@@ -1,0 +1,93 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "@fontsource-variable/geist";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-heading: var(--font-sans);
+  --font-sans: 'Geist Variable', sans-serif;
+  --color-border: #27272A;
+  --color-input: #27272A;
+  --color-ring: #E4E4E7;
+  --color-background: #09090B;
+  --color-foreground: #FAFAFA;
+}
+
+:root {
+  --background: #09090B;
+  --surface: #111113;
+  --surface-hover: #18181B;
+  --border: #27272A;
+  --foreground: #FAFAFA;
+  --muted-foreground: #A1A1AA;
+  --accent: #E4E4E7;
+  --success: #22C55E;
+  --warning: #F59E0B;
+  --critical: #EF4444;
+
+  --card: #111113;
+  --card-foreground: #FAFAFA;
+  --popover: #111113;
+  --popover-foreground: #FAFAFA;
+  --primary: #E4E4E7;
+  --primary-foreground: #09090B;
+  --secondary: #18181B;
+  --secondary-foreground: #FAFAFA;
+  --muted: #18181B;
+  --destructive: #EF4444;
+  --radius: 0.75rem;
+
+  --sidebar-background: #0B0B0D;
+  --sidebar-foreground: #FAFAFA;
+  --sidebar-primary: #E4E4E7;
+  --sidebar-primary-foreground: #09090B;
+  --sidebar-accent: #18181B;
+  --sidebar-accent-foreground: #FAFAFA;
+  --sidebar-border: #27272A;
+  --sidebar-ring: #E4E4E7;
+}
+
+.dark {
+  --background: #09090B;
+  --surface: #111113;
+  --surface-hover: #18181B;
+  --border: #27272A;
+  --foreground: #FAFAFA;
+  --muted-foreground: #A1A1AA;
+  --accent: #E4E4E7;
+  --success: #22C55E;
+  --warning: #F59E0B;
+  --critical: #EF4444;
+
+  --card: #111113;
+  --card-foreground: #FAFAFA;
+  --popover: #111113;
+  --popover-foreground: #FAFAFA;
+  --primary: #E4E4E7;
+  --primary-foreground: #09090B;
+  --secondary: #18181B;
+  --secondary-foreground: #FAFAFA;
+  --muted: #18181B;
+  --destructive: #EF4444;
+
+  --sidebar-background: #0B0B0D;
+  --sidebar-foreground: #FAFAFA;
+  --sidebar-primary: #E4E4E7;
+  --sidebar-primary-foreground: #09090B;
+  --sidebar-accent: #18181B;
+  --sidebar-accent-foreground: #FAFAFA;
+  --sidebar-border: #27272A;
+  --sidebar-ring: #E4E4E7;
+}
+
+@layer base {
+  * {
+    @apply border-[#27272A];
+  }
+  body {
+    background-color: #09090B;
+    color: #FAFAFA;
+    font-family: 'Geist Variable', sans-serif;
+  }
+}
