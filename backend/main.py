@@ -2,7 +2,7 @@ import os
 import json
 import requests
 from typing import Optional
-from fastapi import FastAPI, File, UploadFile, Header, HTTPException, Body
+from fastapi import FastAPI, Request, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -35,30 +35,45 @@ def health_check():
     return {"status": "ok"}
 
 @app.post("/api/v1/sync")
-async def sync_data(
-    payload: Optional[SyncRequest] = None,
-    file: Optional[UploadFile] = File(None)
-):
+async def sync_data(request: Request):
     source = None
+    content_type = request.headers.get("content-type", "")
 
-    # 1. Check file upload
-    if file and file.filename:
-        content = await file.read()
-        if content:
-            source = content
+    # 1. Handle multipart form data (CSV file upload or form source_url)
+    if "multipart/form-data" in content_type:
+        try:
+            form = await request.form()
+            file_obj = form.get("file")
+            if file_obj and hasattr(file_obj, "read"):
+                file_bytes = await file_obj.read()
+                if file_bytes:
+                    source = file_bytes
+            url_val = form.get("source_url")
+            if source is None and url_val:
+                source = str(url_val).strip()
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=f"Failed to parse form data: {str(e)}")
 
-    # 2. Check source_url
-    if source is None and payload and payload.source_url:
-        url = payload.source_url.strip()
-        if url:
-            source = url
+    # 2. Handle application/json (Google Sheet URL or empty payload)
+    else:
+        try:
+            body = await request.json()
+            if isinstance(body, dict):
+                url_val = body.get("source_url")
+                if url_val and str(url_val).strip():
+                    source = str(url_val).strip()
+        except Exception:
+            pass  # Fallback to synthetic data if body empty
 
     # 3. Fallback to local synthetic_sales.csv
-    if source is None:
+    if source is None or (isinstance(source, str) and not source.strip()):
         if os.path.exists(SYNTHETIC_CSV_PATH):
             source = SYNTHETIC_CSV_PATH
         else:
-            raise HTTPException(status_code=400, detail="No source_url or file provided and synthetic_sales.csv is missing.")
+            raise HTTPException(
+                status_code=400,
+                detail="No source_url or file provided and synthetic_sales.csv is missing."
+            )
 
     try:
         df = process_sales_data(source)
