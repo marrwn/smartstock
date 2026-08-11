@@ -60,7 +60,7 @@ export default function ChatPage({ data }) {
         {
           id: (Date.now() + 1).toString(),
           role: 'assistant',
-          text: '⚠️ API Key missing. Please set your Gemini or OpenAI key in Settings.',
+          text: '⚠️ API Key missing. Please set your Gemini, OpenAI, or OpenRouter key in Settings.',
         },
       ]);
       return;
@@ -107,8 +107,8 @@ export default function ChatPage({ data }) {
   };
 
   return (
-    <div className="max-w-4xl space-y-4 animate-in fade-in duration-300 w-full">
-      <Card className="bg-[#111113] border border-[#27272A] shadow-none rounded-xl overflow-hidden flex flex-col h-[680px] w-full">
+    <div className="w-full h-full flex flex-col flex-1 animate-in fade-in duration-300">
+      <Card className="bg-[#111113] border border-[#27272A] shadow-none rounded-xl overflow-hidden flex flex-col flex-1 w-full min-h-[calc(100vh-140px)]">
         {/* Header */}
         <CardHeader className="p-4 border-b border-[#27272A] flex flex-row items-center justify-between pb-3 shrink-0">
           <div className="flex items-center gap-2">
