@@ -1,0 +1,103 @@
+name: Build & Release Desktop App
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release Version (e.g. v1.0.0)'
+        required: true
+        default: 'v1.0.0'
+  push:
+    tags:
+      - 'v*' # Trigger automatically when pushing a tag like v1.0.0
+
+jobs:
+  build-and-release:
+    permissions:
+      contents: write # Essential: gives GitHub Actions permission to publish Releases
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Windows
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            sidecar_src: backend/dist/smartstock-backend.exe
+            sidecar_dst: src-tauri/binaries/smartstock-backend-x86_64-pc-windows-msvc.exe
+
+          # macOS (Apple Silicon)
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            sidecar_src: backend/dist/smartstock-backend
+            sidecar_dst: src-tauri/binaries/smartstock-backend-aarch64-apple-darwin
+
+          # Linux
+          - os: ubuntu-22.04
+            target: x86_64-unknown-linux-gnu
+            sidecar_src: backend/dist/smartstock-backend
+            sidecar_dst: src-tauri/binaries/smartstock-backend-x86_64-unknown-linux-gnu
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # --- Linux Native System Dependencies ---
+      - name: Install Linux dependencies
+        if: matrix.os == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev build-essential curl wget file libssl-dev libayatana-appindicator3-dev librsvg2-dev
+
+      # --- Backend sidecar (PyInstaller) ---
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install backend dependencies + PyInstaller
+        working-directory: backend
+        run: |
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Build backend sidecar binary
+        working-directory: backend
+        run: |
+          pyinstaller --onefile --name smartstock-backend --collect-all scipy --collect-all sklearn --collect-all xgboost main.py
+
+      - name: Place sidecar binary for Tauri
+        shell: bash
+        run: |
+          mkdir -p src-tauri/binaries
+          cp "${{ matrix.sidecar_src }}" "${{ matrix.sidecar_dst }}"
+
+      # --- Frontend + Tauri setup ---
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Install JS dependencies
+        run: pnpm install
+
+      # --- Build & Upload directly to GitHub Releases ---
+      - name: Build Tauri App & Publish Release
+        uses: tauri-apps/tauri-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          args: --target ${{ matrix.target }}
+          tagName: ${{ inputs.version || github.ref_name }}
+          releaseName: 'SmartStock ${{ inputs.version || github.ref_name }}'
+          releaseDraft: true # Creates a Draft Release so you can inspect before publishing
+          prerelease: false
