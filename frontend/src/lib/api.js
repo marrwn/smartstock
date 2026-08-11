@@ -88,7 +88,6 @@ export async function syncData({ sourceUrl, file } = {}) {
   } catch (err) {
     clearTimeout(timeoutId);
     console.warn('Backend sync warning (using synthetic local data fallback):', err.message);
-    // If backend is offline or times out, return local fallback dataset
     return FALLBACK_DATA;
   }
 }
@@ -107,10 +106,12 @@ export async function sendChatMessage({ prompt, apiKey, provider = 'gemini', con
       headers: {
         'Content-Type': 'application/json',
         'x-api-key': apiKey,
+        // Optional: pass provider-specific headers if your backend expects them
+        'x-provider': provider,
       },
       body: JSON.stringify({
         prompt,
-        provider,
+        provider, // 'gemini' | 'openrouter' | etc.
         context,
       }),
       signal: controller.signal,
