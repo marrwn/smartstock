@@ -48,7 +48,9 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
 
       - name: Install JS dependencies
-        run: pnpm install
+        run: |
+          pnpm install
+          pnpm --dir frontend install
 
       - name: Build Tauri app
         uses: tauri-apps/tauri-action@v1
