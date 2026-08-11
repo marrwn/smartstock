@@ -118,14 +118,14 @@ def chat_with_ai(
 
     api_key = x_api_key.strip()
     provider = req.provider.lower()
-    
+
     # Build prompt context summary
     context_str = ""
     if req.context:
         kpis = req.context.get("kpis", {})
         warnings = req.context.get("stock_warnings", [])
         leaderboard = req.context.get("leaderboard", [])
-        
+
         context_str = (
             f"\nCURRENT INVENTORY SYSTEM STATE:\n"
             f"- Revenue: ${kpis.get('revenue', 0):,.2f}\n"
@@ -152,12 +152,12 @@ def chat_with_ai(
                 }]
             }
             res = requests.post(url, headers=headers, json=payload, timeout=15)
-            
+
             if res.status_code == 400 or res.status_code == 401 or res.status_code == 403:
                 raise HTTPException(status_code=401, detail="Invalid Gemini API key or unauthorized access.")
             elif res.status_code != 200:
                 raise HTTPException(status_code=res.status_code, detail=f"Gemini API error: {res.text}")
-                
+
             data = res.json()
             candidates = data.get("candidates", [])
             if candidates and "content" in candidates[0]:
@@ -182,12 +182,12 @@ def chat_with_ai(
                 "max_tokens": 500
             }
             res = requests.post(url, headers=headers, json=payload, timeout=15)
-            
+
             if res.status_code == 401 or res.status_code == 403:
                 raise HTTPException(status_code=401, detail="Invalid OpenAI API key.")
             elif res.status_code != 200:
                 raise HTTPException(status_code=res.status_code, detail=f"OpenAI API error: {res.text}")
-                
+
             data = res.json()
             choices = data.get("choices", [])
             if choices:
@@ -201,3 +201,8 @@ def chat_with_ai(
         raise he
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to communicate with AI provider: {str(e)}")
+
+if __name__ == "__main__":
+    import uvicorn
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run(app, host="0.0.0.0", port=port)
