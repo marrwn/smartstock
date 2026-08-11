@@ -27,7 +27,7 @@ class SyncRequest(BaseModel):
 
 class ChatRequest(BaseModel):
     prompt: str
-    provider: str = "gemini"  # "gemini" or "openai"
+    provider: str = "gemini"  # "gemini", "openai", or "openrouter"
     context: Optional[dict] = None
 
 @app.get("/health")
@@ -138,6 +138,7 @@ def chat_with_ai(
     system_instruction = (
         "You are SmartStock AI, a real-time intelligent inventory copilot for small businesses. "
         "Provide direct, helpful, data-driven advice based on the merchant's context and question. Keep responses concise and action-oriented."
+        "Do not use any markdown context like bold text using ** or anything else"
     )
 
     full_user_prompt = f"{system_instruction}\n{context_str}\nMerchant Question: {req.prompt}"
@@ -153,7 +154,7 @@ def chat_with_ai(
             }
             res = requests.post(url, headers=headers, json=payload, timeout=15)
 
-            if res.status_code == 400 or res.status_code == 401 or res.status_code == 403:
+            if res.status_code in [400, 401, 403]:
                 raise HTTPException(status_code=401, detail="Invalid Gemini API key or unauthorized access.")
             elif res.status_code != 200:
                 raise HTTPException(status_code=res.status_code, detail=f"Gemini API error: {res.text}")
@@ -183,7 +184,7 @@ def chat_with_ai(
             }
             res = requests.post(url, headers=headers, json=payload, timeout=15)
 
-            if res.status_code == 401 or res.status_code == 403:
+            if res.status_code in [401, 403]:
                 raise HTTPException(status_code=401, detail="Invalid OpenAI API key.")
             elif res.status_code != 200:
                 raise HTTPException(status_code=res.status_code, detail=f"OpenAI API error: {res.text}")
@@ -194,6 +195,35 @@ def chat_with_ai(
                 reply = choices[0].get("message", {}).get("content", "No response generated.")
                 return {"reply": reply}
             return {"reply": "No content received from OpenAI API."}
+
+        elif provider == "openrouter":
+            url = "https://openrouter.ai/api/v1/chat/completions"
+            headers = {
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json"
+            }
+            payload = {
+                "model": "nvidia/nemotron-3.5-lightning:free",  # Default free/fast model on OpenRouter, or user can route flexibly
+                "messages": [
+                    {"role": "system", "content": system_instruction},
+                    {"role": "user", "content": f"{context_str}\nMerchant Question: {req.prompt}"}
+                ],
+                "max_tokens": 500
+            }
+            res = requests.post(url, headers=headers, json=payload, timeout=15)
+
+            if res.status_code in [401, 403]:
+                raise HTTPException(status_code=401, detail="Invalid OpenRouter API key.")
+            elif res.status_code != 200:
+                raise HTTPException(status_code=res.status_code, detail=f"OpenRouter API error: {res.text}")
+
+            data = res.json()
+            choices = data.get("choices", [])
+            if choices:
+                reply = choices[0].get("message", {}).get("content", "No response generated.")
+                return {"reply": reply}
+            return {"reply": "No content received from OpenRouter API."}
+
         else:
             raise HTTPException(status_code=400, detail=f"Unsupported provider: {provider}")
 
