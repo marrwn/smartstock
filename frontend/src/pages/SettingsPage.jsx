@@ -445,86 +445,107 @@ export default function SettingsPage() {
           )}
 
           {/* SECTION 3: AI & API KEYS */}
-          {activeSection === 'ai' && (
-            <Card className="bg-[#111113] border border-[#27272A] shadow-none rounded-xl p-6 space-y-6">
-              <div className="border-b border-[#27272A] pb-3">
-                <h3 className="text-base font-bold text-[#FAFAFA]">AI & API Credentials</h3>
-                <p className="text-xs text-[#A1A1AA]">Bring your own API key to power the SmartStock AI Copilot engine.</p>
-              </div>
+                    {activeSection === 'ai' && (
+                      <Card className="bg-[#111113] border border-[#27272A] shadow-none rounded-xl p-6 space-y-6">
+                        <div className="border-b border-[#27272A] pb-3">
+                          <h3 className="text-base font-bold text-[#FAFAFA]">AI & API Credentials</h3>
+                          <p className="text-xs text-[#A1A1AA]">Bring your own API key to power the SmartStock AI Copilot engine.</p>
+                        </div>
 
-              <form onSubmit={handleSaveAiKeys} className="space-y-5">
-                <div className="space-y-3">
-                  <label className="text-xs font-bold uppercase tracking-wider text-[#A1A1AA]">AI Model Provider</label>
-                  <div className="grid grid-cols-2 gap-3">
-                    <button
-                      type="button"
-                      onClick={() => setProvider('gemini')}
-                      className={`p-3 rounded-xl border text-left flex items-center gap-2.5 transition-all ${
-                        provider === 'gemini'
-                          ? 'border-[#FAFAFA] bg-[#18181B] text-[#FAFAFA] font-bold'
-                          : 'border-[#27272A] bg-[#09090B] text-[#A1A1AA] hover:border-[#3F3F46]'
-                      }`}
-                    >
-                      <Sparkles className="w-4 h-4 text-[#FAFAFA]" />
-                      <div>
-                        <div className="text-xs font-bold text-[#FAFAFA]">Google Gemini</div>
-                        <div className="text-[10px] text-[#A1A1AA]">Gemini 1.5 Flash</div>
-                      </div>
-                    </button>
+                        <form onSubmit={handleSaveAiKeys} className="space-y-5">
+                          <div className="space-y-3">
+                            <label className="text-xs font-bold uppercase tracking-wider text-[#A1A1AA]">AI Model Provider</label>
+                            <div className="grid grid-cols-3 gap-3">
+                              <button
+                                type="button"
+                                onClick={() => setProvider('gemini')}
+                                className={`p-3 rounded-xl border text-left flex items-center gap-2.5 transition-all ${
+                                  provider === 'gemini'
+                                    ? 'border-[#FAFAFA] bg-[#18181B] text-[#FAFAFA] font-bold'
+                                    : 'border-[#27272A] bg-[#09090B] text-[#A1A1AA] hover:border-[#3F3F46]'
+                                }`}
+                              >
+                                <Sparkles className="w-4 h-4 text-[#FAFAFA]" />
+                                <div>
+                                  <div className="text-xs font-bold text-[#FAFAFA]">Google Gemini</div>
+                                  <div className="text-[10px] text-[#A1A1AA]">Gemini 1.5 Flash</div>
+                                </div>
+                              </button>
 
-                    <button
-                      type="button"
-                      onClick={() => setProvider('openai')}
-                      className={`p-3 rounded-xl border text-left flex items-center gap-2.5 transition-all ${
-                        provider === 'openai'
-                          ? 'border-[#FAFAFA] bg-[#18181B] text-[#FAFAFA] font-bold'
-                          : 'border-[#27272A] bg-[#09090B] text-[#A1A1AA] hover:border-[#3F3F46]'
-                      }`}
-                    >
-                      <KeyRound className="w-4 h-4 text-[#FAFAFA]" />
-                      <div>
-                        <div className="text-xs font-bold text-[#FAFAFA]">OpenAI</div>
-                        <div className="text-[10px] text-[#A1A1AA]">GPT-4o mini</div>
-                      </div>
-                    </button>
-                  </div>
-                </div>
+                              <button
+                                type="button"
+                                onClick={() => setProvider('openai')}
+                                className={`p-3 rounded-xl border text-left flex items-center gap-2.5 transition-all ${
+                                  provider === 'openai'
+                                    ? 'border-[#FAFAFA] bg-[#18181B] text-[#FAFAFA] font-bold'
+                                    : 'border-[#27272A] bg-[#09090B] text-[#A1A1AA] hover:border-[#3F3F46]'
+                                }`}
+                              >
+                                <KeyRound className="w-4 h-4 text-[#FAFAFA]" />
+                                <div>
+                                  <div className="text-xs font-bold text-[#FAFAFA]">OpenAI</div>
+                                  <div className="text-[10px] text-[#A1A1AA]">GPT-4o mini</div>
+                                </div>
+                              </button>
 
-                <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase tracking-wider text-[#A1A1AA]">API Secret Key</label>
-                  <Input
-                    type="password"
-                    placeholder={provider === 'gemini' ? 'AIzaSy...' : 'sk-proj-...'}
-                    value={apiKey}
-                    onChange={(e) => setApiKey(e.target.value)}
-                    className="bg-[#09090B] border-[#27272A] text-xs text-[#FAFAFA] rounded-xl h-10"
-                  />
-                  <p className="text-[11px] text-[#A1A1AA]">
-                    Key is stored locally in your browser only, never sent to SmartStock servers.
-                  </p>
-                </div>
+                              <button
+                                type="button"
+                                onClick={() => setProvider('openrouter')}
+                                className={`p-3 rounded-xl border text-left flex items-center gap-2.5 transition-all ${
+                                  provider === 'openrouter'
+                                    ? 'border-[#FAFAFA] bg-[#18181B] text-[#FAFAFA] font-bold'
+                                    : 'border-[#27272A] bg-[#09090B] text-[#A1A1AA] hover:border-[#3F3F46]'
+                                }`}
+                              >
+                                <Sparkles className="w-4 h-4 text-[#FAFAFA]" />
+                                <div>
+                                  <div className="text-xs font-bold text-[#FAFAFA]">OpenRouter</div>
+                                  <div className="text-[10px] text-[#A1A1AA]">Multiple Models</div>
+                                </div>
+                              </button>
+                            </div>
+                          </div>
 
-                <div className="flex items-center justify-between pt-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    disabled={isTestingKey}
-                    onClick={handleTestConnection}
-                    className="bg-[#18181B] border-[#27272A] text-[#FAFAFA] hover:bg-[#27272A] text-xs font-bold rounded-xl h-9"
-                  >
-                    {isTestingKey ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5 mr-1.5" />}
-                    Test Connection
-                  </Button>
+                          <div className="space-y-2">
+                            <label className="text-xs font-bold uppercase tracking-wider text-[#A1A1AA]">API Secret Key</label>
+                            <Input
+                              type="password"
+                              placeholder={
+                                provider === 'gemini'
+                                  ? 'AIzaSy...'
+                                  : provider === 'openai'
+                                  ? 'sk-proj-...'
+                                  : 'sk-or-v1-...'
+                              }
+                              value={apiKey}
+                              onChange={(e) => setApiKey(e.target.value)}
+                              className="bg-[#09090B] border-[#27272A] text-xs text-[#FAFAFA] rounded-xl h-10"
+                            />
+                            <p className="text-[11px] text-[#A1A1AA]">
+                              Key is stored locally in your browser only, never sent to SmartStock servers.
+                            </p>
+                          </div>
 
-                  <Button type="submit" className="bg-[#E4E4E7] text-[#09090B] hover:bg-[#FAFAFA] text-xs font-bold rounded-xl h-9 px-4">
-                    <Save className="w-3.5 h-3.5 mr-1.5" />
-                    Save Key
-                  </Button>
-                </div>
-              </form>
-            </Card>
-          )}
+                          <div className="flex items-center justify-between pt-2">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              disabled={isTestingKey}
+                              onClick={handleTestConnection}
+                              className="bg-[#18181B] border-[#27272A] text-[#FAFAFA] hover:bg-[#27272A] text-xs font-bold rounded-xl h-9"
+                            >
+                              {isTestingKey ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5 mr-1.5" />}
+                              Test Connection
+                            </Button>
 
+                            <Button type="submit" className="bg-[#E4E4E7] text-[#09090B] hover:bg-[#FAFAFA] text-xs font-bold rounded-xl h-9 px-4">
+                              <Save className="w-3.5 h-3.5 mr-1.5" />
+                              Save Key
+                            </Button>
+                          </div>
+                        </form>
+                      </Card>
+                    )}
           {/* SECTION 4: NOTIFICATIONS & ALERTS */}
           {activeSection === 'alerts' && (
             <Card className="bg-[#111113] border border-[#27272A] shadow-none rounded-xl p-6 space-y-6">
