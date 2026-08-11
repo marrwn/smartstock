@@ -1,0 +1,67 @@
+name: Build Desktop App
+
+on:
+  workflow_dispatch:   # manual trigger from the Actions tab
+  # push:
+  #   branches: [main]  # uncomment to also build automatically on every push to main
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # --- Backend sidecar (PyInstaller) ---
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install backend dependencies + PyInstaller
+        working-directory: backend
+        run: |
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Build backend sidecar binary
+        working-directory: backend
+        run: |
+          pyinstaller --onefile --name smartstock-backend --collect-all scipy --collect-all sklearn --collect-all xgboost main.py
+
+      - name: Place sidecar binary for Tauri
+        run: |
+          New-Item -ItemType Directory -Force -Path src-tauri\binaries
+          Copy-Item "backend\dist\smartstock-backend.exe" "src-tauri\binaries\smartstock-backend-x86_64-pc-windows-msvc.exe"
+
+      # --- Frontend + Tauri build ---
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install JS dependencies
+        run: pnpm install
+
+      - name: Build Tauri app
+        uses: tauri-apps/tauri-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          args: --target x86_64-pc-windows-msvc
+
+      # --- Upload the installer as a downloadable artifact ---
+      - name: Upload installer artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: smartstock-windows-installer
+          path: |
+            src-tauri/target/x86_64-pc-windows-msvc/release/bundle/nsis/*.exe
+            src-tauri/target/x86_64-pc-windows-msvc/release/bundle/msi/*.msi
